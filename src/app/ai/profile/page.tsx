@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { PageHeader } from "@/components/ai/PageHeader";
+import { buttonClassName } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Spinner } from "@/components/ui/Spinner";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProfilePage() {
@@ -15,48 +19,47 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-slate-500">Loading…</p>
+      <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] px-4 py-5 text-sm text-[var(--foreground-muted)]">
+        <Spinner />
+        Loading profile...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link href="/ai/dashboard" className="text-slate-600 hover:text-slate-900">
-            ← Dashboard
-          </Link>
-        </div>
-      </header>
-      <main className="mx-auto max-w-md px-4 py-8">
-        <h1 className="text-2xl font-bold text-slate-900">Profile</h1>
-        <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 space-y-4">
+    <>
+      <PageHeader title="Profile" description="Manage your account and token balance." />
+
+      <div className="max-w-xl">
+        <Card className="space-y-4">
           <div>
-            <p className="text-sm font-medium text-slate-500">Name</p>
-            <p className="text-slate-900">{profile.name}</p>
+            <p className="text-sm font-medium text-[var(--foreground-muted)]">Name</p>
+            <p className="text-[var(--foreground)]">{profile.name}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Email</p>
-            <p className="text-slate-900">{profile.email}</p>
+            <p className="text-sm font-medium text-[var(--foreground-muted)]">Email</p>
+            <p className="text-[var(--foreground)]">{profile.email}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500">Token balance</p>
-            <p className="text-slate-900">{profile.tokens} tokens</p>
-            <Link href="/ai/tokens" className="mt-1 inline-block text-sm font-medium text-slate-700 hover:underline">
+            <p className="text-sm font-medium text-[var(--foreground-muted)]">Token balance</p>
+            <p className="text-[var(--foreground)]">{profile.tokens} tokens</p>
+            <Link
+              href="/ai/tokens"
+              className="focus-ring mt-1 inline-block rounded-sm text-sm font-medium text-[var(--primary)] underline"
+            >
               Buy tokens
             </Link>
           </div>
-        </div>
+        </Card>
+
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-6 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className={`${buttonClassName("secondary", "md")} mt-6`}
         >
           Log out
         </button>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }

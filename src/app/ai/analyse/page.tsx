@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useState } from "react";
+import { PageHeader } from "@/components/ai/PageHeader";
+import { buttonClassName } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Spinner } from "@/components/ui/Spinner";
 import { api } from "@/lib/api";
 import type { AnalyseResponse } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,20 +33,28 @@ export default function AnalysePage() {
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [legalConfirmed, setLegalConfirmed] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const len = text.length;
   const cost = tokenCost(len);
-  const canSubmitText = len >= MIN_LEN && len <= MAX_LEN && (profile?.tokens ?? 0) >= cost;
+  const canSubmitText =
+    len >= MIN_LEN &&
+    len <= MAX_LEN &&
+    (profile?.tokens ?? 0) >= cost &&
+    legalConfirmed;
 
   const handleAnalyseText = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmitText) return;
+    if (!canSubmitText || !legalConfirmed) return;
     setError("");
     setLoading(true);
     try {
-      const body: { text: string; language?: string } = { text };
+      const body: { text: string; language?: string; legal_confirmed: boolean } = {
+        text,
+        legal_confirmed: legalConfirmed,
+      };
       if (language) body.language = language;
       const res = await api.post<AnalyseResponse>("/documents/text", body);
       await refreshProfile();
@@ -56,12 +68,13 @@ export default function AnalysePage() {
 
   const handleAnalyseFile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || (profile?.tokens ?? 0) < 1) return;
+    if (!file || (profile?.tokens ?? 0) < 1 || !legalConfirmed) return;
     setError("");
     setLoading(true);
     try {
       const form = new FormData();
       form.append("file", file);
+      form.append("legal_confirmed", legalConfirmed ? "true" : "false");
       if (language) form.append("language", language);
       const res = await api.postFormData<AnalyseResponse>("/documents/upload", form);
       await refreshProfile();
@@ -74,67 +87,65 @@ export default function AnalysePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link href="/ai/dashboard" className="text-slate-600 hover:text-slate-900">
-            ← Dashboard
-          </Link>
-          <span className="font-medium text-slate-800">
-            Balance: {profile?.tokens ?? 0} tokens
-          </span>
-        </div>
-      </header>
-      <main className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="text-2xl font-bold text-slate-900">Analyse contract</h1>
-        <p className="mt-1 text-slate-600">
-          Paste text or upload a PDF (min {MIN_LEN.toLocaleString()} chars, max {MAX_LEN.toLocaleString()})
-        </p>
+    <>
+      <PageHeader
+        title="Analyse contract"
+        description={`Paste text or upload a PDF (min ${MIN_LEN.toLocaleString()} chars, max ${MAX_LEN.toLocaleString()}).`}
+      />
 
-        <div className="mt-6 flex gap-2 border-b border-slate-200">
+      <Card>
+        <div className="flex gap-2 border-b border-[var(--border)]">
           <button
             type="button"
-            onClick={() => setTab("text")}
-            className={`border-b-2 px-4 py-2 text-sm font-medium ${
+            onClick={() => {
+              setTab("text");
+              setLegalConfirmed(false);
+            }}
+            className={`focus-ring border-b-2 px-4 py-2 text-sm font-medium ${
               tab === "text"
-                ? "border-slate-800 text-slate-900"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-[var(--primary)] text-[var(--foreground)]"
+                : "border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
             }`}
           >
             Paste text
           </button>
           <button
             type="button"
-            onClick={() => setTab("file")}
-            className={`border-b-2 px-4 py-2 text-sm font-medium ${
+            onClick={() => {
+              setTab("file");
+              setLegalConfirmed(false);
+            }}
+            className={`focus-ring border-b-2 px-4 py-2 text-sm font-medium ${
               tab === "file"
-                ? "border-slate-800 text-slate-900"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-[var(--primary)] text-[var(--foreground)]"
+                : "border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
             }`}
           >
             Upload PDF
           </button>
         </div>
 
-        <div className="mt-6 flex gap-4">
-          <div className="shrink-0">
-            <label className="block text-sm font-medium text-slate-700">Language</label>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-            >
-              {LANGUAGES.map((opt) => (
-                <option key={opt.value || "auto"} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="mt-5">
+          <label className="block text-sm font-medium text-[var(--foreground)]">
+            Language
+          </label>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="focus-ring mt-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)]"
+          >
+            {LANGUAGES.map((opt) => (
+              <option key={opt.value || "auto"} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {error && (
-          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
+          <p className="mt-4 rounded-[var(--radius-md)] bg-red-50 p-3 text-sm text-red-700">
+            {error}
+          </p>
         )}
 
         {tab === "text" && (
@@ -144,19 +155,38 @@ export default function AnalysePage() {
               onChange={(e) => setText(e.target.value)}
               placeholder="Paste your contract text here..."
               rows={14}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              className="focus-ring w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 font-mono text-sm text-[var(--foreground)]"
             />
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-[var(--foreground-muted)]">
               {len.toLocaleString()} characters · Cost: {cost} tokens
               {len > 0 && len < MIN_LEN && ` (need ${MIN_LEN - len} more)`}
               {len > MAX_LEN && ` (max ${MAX_LEN})`}
             </p>
+            <label className="mt-4 flex items-start gap-2 text-sm text-[var(--foreground-muted)]">
+              <input
+                type="checkbox"
+                checked={legalConfirmed}
+                onChange={(e) => setLegalConfirmed(e.target.checked)}
+                className="focus-ring mt-0.5 h-4 w-4 rounded border-[var(--border)] text-[var(--primary)]"
+              />
+              <span>
+                I confirm I have the legal right to upload and process this
+                document
+              </span>
+            </label>
             <button
               type="submit"
               disabled={!canSubmitText || loading}
-              className="mt-4 rounded-lg bg-slate-800 px-6 py-2.5 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+              className={`${buttonClassName("primary", "md")} mt-4 disabled:opacity-50`}
             >
-              {loading ? "Analysing…" : "Analyse"}
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Spinner className="h-4 w-4 border-white/40 border-t-white" />
+                  Sending for analysis…
+                </span>
+              ) : (
+                "Analyse"
+              )}
             </button>
           </form>
         )}
@@ -164,30 +194,60 @@ export default function AnalysePage() {
         {tab === "file" && (
           <form onSubmit={handleAnalyseFile} className="mt-6">
             <label className="block">
-              <span className="block text-sm font-medium text-slate-700">PDF file (max 10MB)</span>
+              <span className="block text-sm font-medium text-[var(--foreground)]">
+                PDF file (max 10MB)
+              </span>
               <input
                 type="file"
                 accept="application/pdf"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="mt-1 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:text-slate-800"
+                className="mt-1 block w-full text-sm text-[var(--foreground-muted)] file:mr-4 file:rounded-[var(--radius-md)] file:border-0 file:bg-[var(--surface-muted)] file:px-4 file:py-2 file:text-[var(--foreground)]"
               />
+            </label>
+            <label className="mt-4 flex items-start gap-2 text-sm text-[var(--foreground-muted)]">
+              <input
+                type="checkbox"
+                checked={legalConfirmed}
+                onChange={(e) => setLegalConfirmed(e.target.checked)}
+                className="focus-ring mt-0.5 h-4 w-4 rounded border-[var(--border)] text-[var(--primary)]"
+              />
+              <span>
+                I confirm I have the legal right to upload and process this
+                document
+              </span>
             </label>
             <button
               type="submit"
-              disabled={!file || loading || (profile?.tokens ?? 0) < 1}
-              className="mt-4 rounded-lg bg-slate-800 px-6 py-2.5 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+              disabled={
+                !file ||
+                loading ||
+                (profile?.tokens ?? 0) < 1 ||
+                !legalConfirmed
+              }
+              className={`${buttonClassName("primary", "md")} mt-4 disabled:opacity-50`}
             >
-              {loading ? "Uploading & analysing…" : "Upload and analyse"}
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Spinner className="h-4 w-4 border-white/40 border-t-white" />
+                  Sending for analysis…
+                </span>
+              ) : (
+                "Upload and analyse"
+              )}
             </button>
           </form>
         )}
 
         {(profile?.tokens ?? 0) < 1 && (
           <p className="mt-6 text-sm text-amber-700">
-            You need tokens to analyse. <Link href="/ai/tokens" className="font-medium underline">Buy tokens</Link>.
+            You need tokens to analyse.{" "}
+            <Link href="/ai/tokens" className="font-medium underline">
+              Buy tokens
+            </Link>
+            .
           </p>
         )}
-      </main>
-    </div>
+      </Card>
+    </>
   );
 }

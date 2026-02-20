@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/ai/EmptyState";
+import { PageHeader } from "@/components/ai/PageHeader";
+import { buttonClassName } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Spinner } from "@/components/ui/Spinner";
 import { api } from "@/lib/api";
 import type { TokenPackage } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,7 +19,6 @@ export default function TokensPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setPackagesLoading(true);
     api
       .get<TokenPackage[]>("/tokens/packages")
       .then((data) => {
@@ -36,7 +40,7 @@ export default function TokensPage() {
         priceId,
         type: "token_purchase",
       });
-      window.location.href = res.redirectUrl;
+      window.location.assign(res.redirectUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to start checkout");
       setBuyLoading(false);
@@ -44,73 +48,70 @@ export default function TokensPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link href="/ai/dashboard" className="text-slate-600 hover:text-slate-900">
-            ← Dashboard
-          </Link>
-          <span className="font-medium text-slate-800">
-            Balance: {profile?.tokens ?? 0} tokens
-          </span>
-        </div>
-      </header>
-      <main className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="text-2xl font-bold text-slate-900">Buy tokens</h1>
-        <p className="mt-1 text-slate-600">
-          One token ≈ 1,000 characters. Average contract (~20K chars) ≈ €2. Tokens don't expire.
+    <>
+      <PageHeader
+        title="Buy tokens"
+        description="One token is about 1,000 characters. Average contract (~20K chars) is about 20 tokens."
+      />
+
+      <p className="mb-4 text-sm text-[var(--foreground-muted)]">
+        Current balance: {profile?.tokens ?? 0} tokens
+      </p>
+
+      {error && (
+        <p className="mb-4 rounded-[var(--radius-md)] bg-red-50 p-3 text-sm text-red-700">
+          {error}
         </p>
+      )}
 
-        {error && (
-          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
-        )}
+      {packagesLoading && (
+        <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] px-4 py-5 text-sm text-[var(--foreground-muted)]">
+          <Spinner />
+          Loading packages...
+        </div>
+      )}
 
-        {packagesLoading && (
-          <p className="mt-8 text-slate-600">Loading packages…</p>
-        )}
-
-        {!packagesLoading && packages.length === 0 && (
-          <div className="mt-8 rounded-xl border border-slate-200 bg-white p-8 text-center">
-            <p className="text-slate-700">No token packages available right now.</p>
-            <p className="mt-2 text-sm text-slate-500">
-              Packages may need to be configured in the backend. Try again later or contact support.
-            </p>
-            <Link
-              href="/ai/dashboard"
-              className="mt-6 inline-block text-slate-700 underline hover:no-underline"
-            >
-              ← Back to dashboard
+      {!packagesLoading && packages.length === 0 && (
+        <EmptyState
+          title="No token packages available right now"
+          description="Packages may need to be configured in the backend. Try again later or contact support."
+          action={
+            <Link href="/ai/dashboard" className={buttonClassName("secondary", "md")}>
+              Back to dashboard
             </Link>
-          </div>
-        )}
+          }
+        />
+      )}
 
-        {!packagesLoading && packages.length > 0 && (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {packages.map((pkg) => (
-              <div
-                key={pkg.id}
-                className="rounded-xl border border-slate-200 bg-white p-6"
+      {!packagesLoading && packages.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {packages.map((pkg) => (
+            <Card key={pkg.id}>
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">{pkg.name}</h2>
+              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                {pkg.description ?? ""}
+              </p>
+              <p className="mt-4 text-3xl font-bold text-[var(--foreground)]">${pkg.price}</p>
+              {pkg.savings && (
+                <p className="text-sm text-emerald-700">Save ${pkg.savings}</p>
+              )}
+              <p className="text-sm text-[var(--foreground-muted)]">{pkg.tokens} tokens</p>
+              <button
+                type="button"
+                disabled={buyLoading || !pkg.stripe_price_id}
+                onClick={() => handleBuy(pkg.stripe_price_id ?? "")}
+                className={`${buttonClassName("primary", "md", true)} mt-6 disabled:opacity-50`}
               >
-                <h2 className="text-lg font-semibold text-slate-800">{pkg.name}</h2>
-                <p className="mt-1 text-sm text-slate-600">{pkg.description ?? ""}</p>
-                <p className="mt-4 text-2xl font-bold text-slate-900">${pkg.price}</p>
-                {pkg.savings && (
-                  <p className="text-sm text-green-600">Save ${pkg.savings}</p>
-                )}
-                <p className="text-sm text-slate-500">{pkg.tokens} tokens</p>
-                <button
-                  type="button"
-                  disabled={buyLoading || !pkg.stripe_price_id}
-                  onClick={() => handleBuy(pkg.stripe_price_id ?? "")}
-                  className="mt-6 w-full rounded-lg bg-slate-800 py-2.5 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-                >
-                  {pkg.stripe_price_id ? (buyLoading ? "Redirecting…" : "Buy") : "Not configured"}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+                {pkg.stripe_price_id
+                  ? buyLoading
+                    ? "Redirecting..."
+                    : "Buy"
+                  : "Not configured"}
+              </button>
+            </Card>
+          ))}
+        </div>
+      )}
+    </>
   );
 }

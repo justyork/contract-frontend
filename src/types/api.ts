@@ -56,17 +56,18 @@ export interface ContractAnalysisResult {
 export interface Contract {
   id: number;
   user_id: number;
+  status: "pending" | "completed" | "failed";
   tokens: number;
   text: string;
-  result: ContractAnalysisResult;
+  result: ContractAnalysisResult | null;
   created_at: string;
+  error_message?: string;
 }
 
-/** Analyse response (POST /api/documents/text or upload) */
+/** Analyse response (POST /api/documents/text or upload) — returns immediately with id; analysis runs in background */
 export interface AnalyseResponse {
   id: number;
   tokens: number;
-  result: ContractAnalysisResult;
 }
 
 /** Login response */

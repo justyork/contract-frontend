@@ -6,6 +6,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { LoginResponse } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +43,18 @@ export default function LoginPage() {
             Create an account
           </Link>
         </p>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="mt-6">
+          <GoogleAuthButton redirect={redirect} />
+        </div>
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-slate-500">Or continue with email</span>
+          </div>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
           )}

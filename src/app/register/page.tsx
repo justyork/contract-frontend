@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { GoogleAuthButton } from "@/components/GoogleAuthButton";
+import { TermsAcceptanceCheckbox } from "@/components/TermsAcceptanceCheckbox";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -11,6 +13,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,9 +28,13 @@ export default function RegisterPage() {
       setError("Password must be at least 8 characters");
       return;
     }
+    if (!termsAccepted) {
+      setError("You must accept the terms and policies");
+      return;
+    }
     setLoading(true);
     try {
-      await api.post("/register", { name, email, password });
+      await api.post("/register", { name, email, password, terms_accepted: true });
       router.push("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
@@ -46,7 +53,18 @@ export default function RegisterPage() {
             Log in
           </Link>
         </p>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="mt-6">
+          <GoogleAuthButton redirect="/ai/dashboard" />
+        </div>
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-slate-500">Or continue with email</span>
+          </div>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
           )}
@@ -106,6 +124,11 @@ export default function RegisterPage() {
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
             />
           </div>
+          <TermsAcceptanceCheckbox
+            checked={termsAccepted}
+            onChange={setTermsAccepted}
+            error={error && !termsAccepted ? "You must accept the terms and policies" : undefined}
+          />
           <button
             type="submit"
             disabled={loading}
@@ -114,11 +137,6 @@ export default function RegisterPage() {
             {loading ? "Creating account…" : "Register"}
           </button>
         </form>
-        <p className="mt-6 text-center text-xs text-slate-500">
-          By registering you agree to our{" "}
-          <Link href="/terms" className="underline">Terms</Link> and{" "}
-          <Link href="/privacy" className="underline">Privacy Policy</Link>.
-        </p>
       </div>
     </div>
   );

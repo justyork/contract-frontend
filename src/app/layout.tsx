@@ -30,6 +30,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
+          <a href="#main-content" className="skip-link focus-ring">
+            Skip to main content
+          </a>
           {children}
           <CookieBanner />
         </AuthProvider>
