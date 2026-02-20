@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { PageHeader } from "@/components/ai/PageHeader";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import {
@@ -34,7 +35,7 @@ import {
   type ContractProgressPayload,
   isEchoConfigured,
 } from "@/lib/echo";
-import { api } from "@/lib/api";
+import { api, downloadPdfReport } from "@/lib/api";
 import type { Contract } from "@/types/api";
 
 const POLL_INTERVAL_MS = 2500;
@@ -132,6 +133,19 @@ export default function ContractPage() {
   const lastProgressEventTimeRef = useRef<number>(0);
   const progressPercentRef = useRef<number>(0);
   const stuckCheckRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isPdfDownloading, setIsPdfDownloading] = useState(false);
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    setIsPdfDownloading(true);
+    try {
+      await downloadPdfReport(id, "contract-analysis-" + id + ".pdf");
+    } catch (err) {
+      console.error("PDF download failed:", err);
+    } finally {
+      setIsPdfDownloading(false);
+    }
+  }, [id]);
 
   const fetchContract = useCallback(() => {
     return api.get<Contract>(`/contracts/${id}`).then(setContract).catch((err) => {
@@ -467,6 +481,17 @@ export default function ContractPage() {
       <PageHeader
         title="Analysis result"
         description="Review the high-level score and detailed risk breakdown before signing."
+        action={
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleDownloadPdf}
+            disabled={isPdfDownloading}
+          >
+            {isPdfDownloading ? "Downloading…" : "Download PDF"}
+          </Button>
+        }
       />
 
       <ScoreCard

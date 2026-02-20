@@ -40,6 +40,33 @@ async function request<T>(
   return data as T;
 }
 
+/**
+ * Fetches a PDF from the API and triggers a file download.
+ * Uses Authorization header from localStorage.
+ */
+export async function downloadPdfReport(contractId: string, filename: string): Promise<void> {
+  const url = `${getBaseUrl()}/contracts/${contractId}/report.pdf`;
+  const token = getToken();
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  const res = await fetch(url, { method: "GET", headers });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || res.statusText);
+  }
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(objectUrl);
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path, { method: "GET" }),
   post: <T>(path: string, body: unknown) =>
