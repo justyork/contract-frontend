@@ -125,11 +125,5 @@ export function isEchoConnected(): boolean {
   if (typeof window === "undefined") return false;
   const echo = getEcho();
   if (!echo) return false;
-  // * Check if Echo has a socket connection
-  // * Pusher.js exposes connection state via echo.connector.socket
-  const connector = (echo as any).connector;
-  if (!connector || !connector.socket) return false;
-  const socket = connector.socket;
-  // * Check socket state: 'connected', 'connecting', 'disconnected', 'unavailable'
-  return socket.state === 'connected';
+  return echo.connectionStatus() === "connected";
 }

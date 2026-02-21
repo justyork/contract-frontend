@@ -8,10 +8,11 @@ on:
     branches: [develop, master]
 
 jobs:
-  deploy-staging:
-    name: Deploy to Staging
+  deploy-develop:
+    name: Deploy to Develop
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
+    environment: staging
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -35,6 +36,7 @@ jobs:
     name: Deploy to Production
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
