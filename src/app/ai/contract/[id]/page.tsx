@@ -401,7 +401,7 @@ export default function ContractPage() {
         fallbackProgressRef.current = null;
       }
     };
-  }, [contract?.id, contract?.status, id, fetchContract]);
+  }, [contract, id, fetchContract]);
 
   if (error) {
     return (

@@ -32,16 +32,16 @@ function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { refreshProfile } = useAuth();
-  const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "ok" | "error">(
+    sessionId ? "loading" : "error"
+  );
   const [tokens, setTokens] = useState<number | null>(null);
-  const [errorCode, setErrorCode] = useState<string | undefined>();
+  const [errorCode, setErrorCode] = useState<string | undefined>(
+    sessionId ? undefined : "session_id_required"
+  );
 
   useEffect(() => {
-    if (!sessionId) {
-      setErrorCode("session_id_required");
-      setStatus("error");
-      return;
-    }
+    if (!sessionId) return;
     api
       .post<PaymentConfirmResponse>("/payments/confirm", { session_id: sessionId })
       .then((data) => {

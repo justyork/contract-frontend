@@ -45,16 +45,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const t = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    setTokenState(t);
-    setLoading(false);
+    queueMicrotask(() => {
+      setTokenState(t);
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
     if (!token) {
-      setProfile(null);
+      queueMicrotask(() => setProfile(null));
       return;
     }
-    refreshProfile();
+    queueMicrotask(() => void refreshProfile());
   }, [token, refreshProfile]);
 
   const logout = useCallback(() => {

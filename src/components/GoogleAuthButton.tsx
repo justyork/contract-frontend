@@ -1,15 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 interface GoogleAuthButtonProps {
   redirect?: string;
   className?: string;
 }
 
 export function GoogleAuthButton({ redirect, className }: GoogleAuthButtonProps) {
-  const router = useRouter();
-
   const handleClick = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
     const redirectParam = redirect ? `?redirect=${encodeURIComponent(redirect)}` : "";

@@ -1,8 +1,6 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
-import type { ReactNode } from "react";
-
 type RiskSeverity = "low" | "medium" | "high" | "critical";
 
 interface RiskBadgeProps {

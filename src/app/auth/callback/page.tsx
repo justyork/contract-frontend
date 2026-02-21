@@ -20,7 +20,7 @@ function AuthCallbackContent() {
       trackEventUserLoggedIn();
       router.push(redirect);
     } else {
-      setError("Authentication failed. No token received.");
+      queueMicrotask(() => setError("Authentication failed. No token received."));
     }
   }, [searchParams, setToken, router]);
 

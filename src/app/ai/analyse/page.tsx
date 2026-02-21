@@ -18,13 +18,6 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const MIN_LEN = 1000;
 const MAX_LEN = 100000;
-const LANGUAGES = [
-  { value: "", label: "Auto (contract language)" },
-  { value: "ru", label: "Russian" },
-  { value: "en", label: "English" },
-  { value: "de", label: "German" },
-  { value: "fr", label: "French" },
-];
 
 function tokenCost(len: number): number {
   if (len < MIN_LEN) return 0;
@@ -36,7 +29,7 @@ export default function AnalysePage() {
   const { profile, refreshProfile } = useAuth();
   const [tab, setTab] = useState<"text" | "file">("text");
   const [text, setText] = useState("");
-  const [language, setLanguage] = useState("");
+  const [language] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [legalConfirmed, setLegalConfirmed] = useState(false);
   const [error, setError] = useState("");

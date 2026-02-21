@@ -2,6 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { useEffect } from "react";
 import { buttonClassName } from "@/components/ui/Button";
 
@@ -48,12 +49,12 @@ export default function Error({
             <RefreshCw className="mr-2 h-4 w-4" aria-hidden />
             Try again
           </button>
-          <a
+          <Link
             href="/"
             className={buttonClassName("secondary")}
           >
             Back to home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

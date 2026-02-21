@@ -22,7 +22,7 @@ export function GTMAndAnalytics() {
 
   useEffect(() => {
     const stored = localStorage.getItem(COOKIE_CONSENT_KEY);
-    setConsentAllowed(stored === "all");
+    queueMicrotask(() => setConsentAllowed(stored === "all"));
 
     const onConsentUpdated = (e: Event) => {
       const detail = (e as CustomEvent<{ consent?: string }>).detail;

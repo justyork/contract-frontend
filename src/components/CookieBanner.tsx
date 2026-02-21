@@ -10,7 +10,7 @@ export function CookieBanner() {
 
   useEffect(() => {
     const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
-    if (consent === null) setVisible(true);
+    if (consent === null) queueMicrotask(() => setVisible(true));
   }, []);
 
   const accept = () => {
