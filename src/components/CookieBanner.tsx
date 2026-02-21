@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const COOKIE_CONSENT_KEY = "contralytic_cookie_consent";
+const COOKIE_CONSENT_KEY = "clealex_cookie_consent";
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
@@ -15,6 +15,11 @@ export function CookieBanner() {
 
   const accept = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, "all");
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("clealex_consent_updated", { detail: { consent: "all" } })
+      );
+    }
     setVisible(false);
   };
 

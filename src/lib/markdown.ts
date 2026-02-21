@@ -2,11 +2,11 @@ import fs from "fs";
 import path from "path";
 
 /**
- * Reads a markdown file from the docs directory within the frontend repository
+ * Reads a markdown file from the content directory within the frontend repository.
+ * Uses "content" (not "pages") to avoid Next.js treating it as the Pages Router.
  */
 export function readMarkdownFile(filename: string): string {
-  // Read from docs folder in the frontend repository root
-  const filePath = path.join(process.cwd(), "docs", filename);
+  const filePath = path.join(process.cwd(), "content", filename);
   try {
     if (fs.existsSync(filePath)) {
       return fs.readFileSync(filePath, "utf-8");

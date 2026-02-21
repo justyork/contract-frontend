@@ -1,0 +1,55 @@
+# * CD: deploy to Hetzner via SSH on push to develop (staging) or master (production).
+# * Required GitHub Secrets: SSH_PRIVATE_KEY, SSH_HOST, SSH_USER, DEPLOY_PATH_STAGING, DEPLOY_PATH_PRODUCTION
+# * On server: Node 20+, PM2 for Next.js instance (e.g. clealex-frontend, clealex-frontend-staging).
+name: Deploy
+
+on:
+  push:
+    branches: [develop, master]
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH_STAGING }}"
+            BRANCH="develop"
+            cd "$DEPLOY_PATH" || { echo "Invalid DEPLOY_PATH"; exit 1; }
+            git fetch origin
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+            yarn install
+            yarn build
+            pm2 restart clealex-frontend-staging 2>/dev/null || true
+
+  deploy-production:
+    name: Deploy to Production
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH_PRODUCTION }}"
+            BRANCH="master"
+            cd "$DEPLOY_PATH" || { echo "Invalid DEPLOY_PATH"; exit 1; }
+            git fetch origin
+            git checkout "$BRANCH"
+            git pull origin "$BRANCH"
+            yarn install
+            yarn build
+            pm2 restart clealex-frontend 2>/dev/null || true

@@ -1,5 +1,5 @@
 /**
- * API client for Contractor/Contralytic backend.
+ * API client for Clealex backend.
  * Uses NEXT_PUBLIC_API_URL and sends JWT from localStorage when available.
  */
 

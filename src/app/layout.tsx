@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CookieBanner } from "@/components/CookieBanner";
+import { GTMAndAnalytics } from "@/components/GTMAndAnalytics";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Contralytic — Contract Analysis",
+  title: "Clealex — Contract Analysis",
   description: "AI-powered contract analysis: risks, key points, signing recommendation",
 };
 
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
+          <GTMAndAnalytics />
           <a href="#main-content" className="skip-link focus-ring">
             Skip to main content
           </a>

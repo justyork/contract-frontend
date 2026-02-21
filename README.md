@@ -1,6 +1,6 @@
-# Contralytic / Contractor Frontend
+# Clealex Frontend
 
-This is the frontend for Contralytic MVP — AI-powered contract analysis SaaS built with [Next.js](https://nextjs.org).
+This is the frontend for Clealex — AI-powered contract analysis SaaS built with [Next.js](https://nextjs.org).
 
 ## Quick Start
 

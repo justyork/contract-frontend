@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { api } from "@/lib/api";
+import { trackEventUserLoggedIn } from "@/lib/analytics";
 import type { LoginResponse } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/ai/dashboard";
@@ -25,6 +26,7 @@ export default function LoginPage() {
     try {
       const res = await api.post<LoginResponse>("/login", { email, password });
       setToken(res.token);
+      trackEventUserLoggedIn();
       router.push(redirect);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -94,5 +96,21 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800" />
+          </div>
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }

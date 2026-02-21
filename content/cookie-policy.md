@@ -1,10 +1,10 @@
-# Cookie Policy
 
-Last updated: [DATE]
+Last updated: 23.02.2026
+
 
 **Important Notice:** This Cookie Policy is an informational document describing our use of cookies and tracking technologies. It does not constitute legal advice. For questions about your rights regarding cookies, you may wish to consult with a qualified attorney.
 
-This Cookie Policy explains how [Company Name] ("Provider", "we", "us", or "our") uses cookies and similar tracking technologies when you use the Service. This policy should be read together with our [Privacy Policy](/privacy) and [Terms of Use](/terms).
+This Cookie Policy explains how Clealex ("Provider", "we", "us", or "our") uses cookies and similar tracking technologies when you use the Service. This policy should be read together with our [Privacy Policy](/privacy) and [Terms of Use](/terms).
 
 ## 1. What Are Cookies?
 
@@ -128,8 +128,8 @@ We may update this Cookie Policy from time to time to reflect changes in our pra
 
 If you have questions about our use of cookies, please contact us:
 
-**Email:** [Privacy Email]  
-**Company:** [Company Name]  
-**Address:** [Address]
+**Email:** privacy@clealex.com  
+**Company:**  Clealex   
+**Address:** Cyprus, Limassol 3031, Efkleidou 9 
 
 For general privacy inquiries, see our [Privacy Policy](/privacy).

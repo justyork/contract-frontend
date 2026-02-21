@@ -2,7 +2,7 @@
 
 ## Назначение
 
-В этом документе определены роли, обязанности и рабочие процессы для AI-агентов, работающих над проектом Contractor Frontend. Contractor Frontend — приложение на Next.js 16 (App Router) с React 19 и TypeScript, интерфейс для Contralytic (SaaS анализа контрактов на базе ИИ). Оно потребляет Contractor API и использует Laravel Echo для обновлений прогресса в реальном времени.
+В этом документе определены роли, обязанности и рабочие процессы для AI-агентов, работающих над проектом Clealex Frontend. Clealex Frontend — приложение на Next.js 16 (App Router) с React 19 и TypeScript, интерфейс для Clealex (SaaS анализа контрактов на базе ИИ). Оно потребляет Contractor API и использует Laravel Echo для обновлений прогресса в реальном времени.
 
 ## Роли
 

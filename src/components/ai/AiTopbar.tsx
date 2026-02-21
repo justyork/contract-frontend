@@ -27,7 +27,7 @@ export function AiTopbar({ onMenuClick }: AiTopbarProps) {
             href="/ai/dashboard"
             className="focus-ring rounded-sm text-lg font-semibold tracking-tight text-[var(--foreground)]"
           >
-            Contralytic
+            Clealex
           </Link>
         </div>
 

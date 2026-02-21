@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { trackEventUserLoggedIn } from "@/lib/analytics";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setToken } = useAuth();
@@ -16,6 +17,7 @@ export default function AuthCallbackPage() {
 
     if (token) {
       setToken(token);
+      trackEventUserLoggedIn();
       router.push(redirect);
     } else {
       setError("Authentication failed. No token received.");
@@ -48,5 +50,26 @@ export default function AuthCallbackPage() {
         <p className="mt-4 text-center text-sm text-slate-600">Completing authentication...</p>
       </div>
     </div>
+  );
+}
+
+function AuthCallbackFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-800"></div>
+        </div>
+        <p className="mt-4 text-center text-sm text-slate-600">Completing authentication...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<AuthCallbackFallback />}>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }

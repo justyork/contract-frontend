@@ -6,7 +6,7 @@
 |-----------|------------|--------------|
 | **Development** | Локальная разработка | `http://localhost:3000` |
 | **Staging** | Предпродакшен-тестирование | напр. `https://staging-app.example.com` |
-| **Production** | Боевое приложение | напр. `https://app.contralytic.com` |
+| **Production** | Боевое приложение | напр. `https://clealex.com` |
 
 В браузер попадают только переменные с префиксом `NEXT_PUBLIC_`. Остальные в Next.js — на время сборки или только для сервера; в этом приложении основные потоки рендерятся на клиенте, поэтому **никогда не помещайте секреты в `NEXT_PUBLIC_*`**.
 
@@ -35,6 +35,10 @@
 | `NEXT_PUBLIC_REVERB_PORT` | Нет | Порт Reverb (по умолчанию `8081`). |
 | `NEXT_PUBLIC_REVERB_SCHEME` | Нет | `http` или `https`; в продакшене использовать `https` для WSS. |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Нет | Publishable key Stripe для checkout на клиенте (напр. `pk_test_...` или `pk_live_...`). |
+| `NEXT_PUBLIC_SUPPORT_EMAIL` | Нет | Email для страницы Contact & Support (поддержка, запросы по персональным данным). В проде задать реальное значение. |
+| `NEXT_PUBLIC_COMPANY_NAME` | Нет | Название компании для страницы Contact & Support и согласованности с Privacy/Terms. |
+| `NEXT_PUBLIC_COMPANY_ADDRESS` | Нет | Юридический адрес для страницы Contact & Support. |
+| `NEXT_PUBLIC_GTM_ID` | Нет | ID контейнера Google Tag Manager (напр. `GTM-XXXXXX`). При задании GTM подключается только после согласия пользователя на аналитические cookies («Accept all»); события отправляются в `dataLayer` для настройки тегов в GTM (GA4 и др.). |
 
 ## Правила работы с секретами
 

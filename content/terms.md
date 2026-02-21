@@ -1,9 +1,9 @@
-# Terms of Use
 
-Last updated: [DATE]
+Last updated: 23.02.2026
+
 **Important Legal Notice:** These Terms of Use are a legal agreement between you and the Provider. However, these Terms themselves do not constitute legal advice, and you should consult with a qualified attorney if you have questions about your rights or obligations under these Terms or applicable law.
 
-These Terms of Use ("Terms") govern access to and use of the AI-powered contract analysis platform (the "Service") operated by [Company Name] ("Provider", "we", "us", or "our"). By accessing or using the Service, or by creating an account, you ("User" or "Client") agree to be bound by these Terms, our [Privacy Policy](/privacy), and our [Cookie Policy](/cookie-policy). If you do not agree, do not use the Service.
+These Terms of Use ("Terms") govern access to and use of the AI-powered contract analysis platform (the "Service") operated by Clealex ("Provider", "we", "us", or "our"). By accessing or using the Service, or by creating an account, you ("User" or "Client") agree to be bound by these Terms, our [Privacy Policy](/privacy), and our [Cookie Policy](/cookie-policy). If you do not agree, do not use the Service.
 
 ## 1. Description of the Service
 

@@ -25,9 +25,9 @@ const getToken = (): string | null => {
   return localStorage.getItem("token");
 };
 
-let echoInstance: Echo | null = null;
+let echoInstance: Echo<"reverb"> | null = null;
 
-function getEcho(): Echo | null {
+function getEcho(): Echo<"reverb"> | null {
   if (typeof window === "undefined") return null;
   const key = process.env.NEXT_PUBLIC_REVERB_APP_KEY;
   if (!key) return null;

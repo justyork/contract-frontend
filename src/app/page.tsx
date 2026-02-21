@@ -3,14 +3,26 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
+  AlertCircle,
   Building2,
   Clock,
+  DollarSign,
+  EyeOff,
   FileCheck,
+  FileText,
+  Handshake,
   Languages,
+  Lightbulb,
+  List,
   Scale,
+  Settings,
+  ShieldAlert,
+  ShieldCheck,
+  Target,
   TrendingUp,
   Upload,
   User,
+  X,
   Zap,
 } from "lucide-react";
 import { HomeHeaderNav } from "@/components/HomeHeaderNav";
@@ -20,53 +32,91 @@ import { buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { Section } from "@/components/ui/Section";
+import {
+  Accordion,
+  AnalysisSection,
+  QuickSummary,
+  ScoreCard,
+  SectionGroup,
+} from "@/components/contract-analysis";
 
 const iconProps = { size: 24, strokeWidth: 1.5 };
 
-type SampleTab = "risks" | "clauses" | "recommendation";
+/** Demo report data: same structure as real analysis result. */
+const DEMO_SCORE = 4;
+const DEMO_CONTRACT_TYPE = "Master Services Agreement";
+const DEMO_PARTIES = ["Provider", "Client"] as const;
 
-const sampleTabs: Array<{ id: SampleTab; label: string }> = [
-  { id: "risks", label: "Risks" },
-  { id: "clauses", label: "Clauses" },
-  { id: "recommendation", label: "Recommendation" },
+const DEMO_RISKS = [
+  "The Provider can unilaterally modify services and pricing, creating potential financial unpredictability for the Client.",
+  "The Client is bound to pay for the entire Subscription Term even if they terminate early, which could lead to financial loss.",
+  "Automatic renewal clauses may result in unintended financial obligations if the Client fails to terminate in time.",
+  "The Provider has extensive rights to use Client Data, including for AI training, which may raise privacy concerns.",
+  "The Provider's liability is significantly limited, potentially leaving the Client without recourse for damages.",
 ];
 
-const sampleContent: Record<
-  SampleTab,
-  { title: string; points: string[]; tone: "brand" | "success" | "neutral" }
-> = {
-  risks: {
-    title: "Top issues detected",
-    points: [
-      "Auto-renewal clause with only 7-day cancellation window.",
-      "Broad liability cap exclusion for vendor negligence.",
-      "Unbalanced termination rights in favor of the supplier.",
-    ],
-    tone: "brand",
-  },
-  clauses: {
-    title: "Key clauses at a glance",
-    points: [
-      "Payment terms: Net 30 with 2.5% monthly late fee.",
-      "Data processing obligations mapped to privacy standards.",
-      "IP ownership remains with contractor for pre-existing assets.",
-    ],
-    tone: "neutral",
-  },
-  recommendation: {
-    title: "Signing recommendation",
-    points: [
-      "Current score: 6.5/10. Sign only after clause adjustments.",
-      "Negotiate cancellation period to minimum 30 days.",
-      "Add mutual limitation of liability language before approval.",
-    ],
-    tone: "success",
-  },
-};
+const DEMO_HIDDEN_CLAUSES = [
+  "The Provider's right to modify the agreement unilaterally (Section 11) without explicit consent from the Client.",
+  "Automatic activation of premium features based on usage thresholds (Section 2.3) without explicit consent.",
+  "The perpetual and irrevocable license granted to the Provider to use Client Data (Section 7.1).",
+  "The automatic renewal clause (Section 6.1) which may not be obvious to the Client.",
+];
+
+const DEMO_COMPLIANCE = [
+  "Potential GDPR compliance risks due to extensive data usage rights granted to the Provider.",
+  "Cross-border data transfer without explicit consent may violate data protection regulations.",
+  "Perpetual data usage rights: contract grants ongoing or irreversible rights to use/retain user data.",
+];
+
+const DEMO_LEGAL_PERSPECTIVE =
+  "The contract heavily favors the Provider, allowing unilateral modifications and limiting liability, which could lead to enforceability issues if challenged.";
+
+const DEMO_FINANCIAL_PERSPECTIVE =
+  "The contract creates hidden financial obligations through automatic renewals and usage-based charges, which could lead to unexpected costs for the Client.";
+
+const DEMO_OPERATIONAL_PERSPECTIVE =
+  "The Client may face operational challenges due to potential service modifications and the need to monitor usage to avoid automatic feature activations.";
+
+const DEMO_STRATEGIC_PERSPECTIVE =
+  "The agreement's terms may limit the Client's strategic flexibility, particularly due to data usage rights and automatic renewals.";
+
+const DEMO_KEY_POINTS = [
+  "The Provider offers an AI document analysis platform on a subscription basis.",
+  "The Client is financially liable for the full initial Subscription Term even if terminated early.",
+  "The Provider can modify services and pricing at its sole discretion.",
+  "Client Data can be used by the Provider for various purposes including AI training.",
+  "The agreement automatically renews unless terminated 30 days prior to renewal.",
+];
+
+const DEMO_TERMINATION = [
+  "The Client can terminate for convenience with written notice but remains liable for the full Subscription Term.",
+  "The agreement automatically renews unless terminated 30 days prior to renewal.",
+];
+
+const DEMO_SUGGESTIONS = [
+  "Negotiate for a more balanced termination clause that does not financially penalize the Client for early termination.",
+  "Request explicit consent for any service modifications or pricing changes.",
+  "Ensure that automatic renewal terms are clearly communicated and require explicit consent.",
+  "Limit the Provider's rights to use Client Data, especially for AI training, to protect privacy and data ownership.",
+  "Seek to increase the Provider's liability cap to ensure adequate recourse in case of service failures.",
+];
+
+const DEMO_NEGOTIATION = [
+  "Negotiate termination terms to avoid financial penalties.",
+  "Limit the Provider's unilateral rights to modify services and pricing.",
+  "Clarify and restrict data usage rights to ensure compliance with data protection laws.",
+];
+
+type DemoReportTab = "risks" | "perspectives" | "details";
+
+const DEMO_TABS: Array<{ id: DemoReportTab; label: string }> = [
+  { id: "risks", label: "Risks & Issues" },
+  { id: "perspectives", label: "Analysis Perspectives" },
+  { id: "details", label: "Contract Details" },
+];
 
 export default function Home() {
-  const [activeSampleTab, setActiveSampleTab] = useState<SampleTab>("risks");
-  const selectedSample = sampleContent[activeSampleTab];
+  const [demoTab, setDemoTab] = useState<DemoReportTab>("risks");
 
   useEffect(() => {
     const els = document.querySelectorAll("[data-animate]");
@@ -91,7 +141,7 @@ export default function Home() {
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md">
         <Container size="lg" className="flex h-16 items-center justify-between">
-          <span className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Contralytic</span>
+          <span className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Clealex</span>
           <HomeHeaderNav />
         </Container>
       </header>
@@ -104,7 +154,7 @@ export default function Home() {
               Sign with confidence, not guesswork
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[var(--foreground-muted)]">
-              Contralytic reviews your contract in minutes and highlights hidden
+              Clealex reviews your contract in minutes and highlights hidden
               risks, key obligations, and negotiation priorities in one clean
               report.
             </p>
@@ -225,56 +275,167 @@ export default function Home() {
               Preview how insights are organized before you register.
             </p>
           </div>
-          <Card className="mx-auto mt-10 max-w-4xl">
+          <div className="mx-auto mt-10 max-w-4xl space-y-6">
+            <div className="flex items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2">
+              <span className="text-sm font-medium text-[var(--foreground-muted)]">
+                Demo report
+              </span>
+              <Badge variant="neutral">Sample only</Badge>
+            </div>
+
+            <ScoreCard score={DEMO_SCORE} />
+
+            <QuickSummary
+              contractType={DEMO_CONTRACT_TYPE}
+              parties={[...DEMO_PARTIES]}
+            />
+
             <div
               className="inline-flex rounded-[var(--radius-pill)] border border-[var(--border)] bg-[var(--surface-muted)] p-1"
               role="tablist"
-              aria-label="Sample analysis tabs"
+              aria-label="Demo report sections"
             >
-              {sampleTabs.map((tab) => {
-                const isActive = tab.id === activeSampleTab;
+              {DEMO_TABS.map((tab) => {
+                const isActive = tab.id === demoTab;
                 return (
                   <button
                     key={tab.id}
                     type="button"
                     role="tab"
                     aria-selected={isActive}
-                    aria-controls={`sample-panel-${tab.id}`}
-                    id={`sample-tab-${tab.id}`}
+                    aria-controls={`demo-panel-${tab.id}`}
+                    id={`demo-tab-${tab.id}`}
                     className={`focus-ring rounded-[var(--radius-pill)] px-4 py-2 text-sm font-medium transition ${
                       isActive
                         ? "bg-[var(--surface)] text-[var(--foreground)] shadow"
                         : "text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
                     }`}
-                    data-analytics-event="demo_tab_switch"
-                    onClick={() => setActiveSampleTab(tab.id)}
+                    onClick={() => setDemoTab(tab.id)}
                   >
                     {tab.label}
                   </button>
                 );
               })}
             </div>
+
             <div
-              id={`sample-panel-${activeSampleTab}`}
+              id={`demo-panel-${demoTab}`}
               role="tabpanel"
-              aria-labelledby={`sample-tab-${activeSampleTab}`}
-              className="mt-6 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-6"
+              aria-labelledby={`demo-tab-${demoTab}`}
+              className="min-h-[200px]"
             >
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-medium text-[var(--foreground)]">
-                  {selectedSample.title}
-                </h3>
-                <Badge variant={selectedSample.tone}>Demo output</Badge>
-              </div>
-              <ul className="mt-4 space-y-3 text-sm text-[var(--foreground-muted)]">
-                {selectedSample.points.map((point) => (
-                  <li key={point} className="rounded-[var(--radius-sm)] bg-[var(--surface-muted)] p-3">
-                    {point}
-                  </li>
-                ))}
-              </ul>
+              {demoTab === "risks" && (
+                <SectionGroup
+                  id="demo-risks"
+                  title="Risks & Issues"
+                  icon={<ShieldAlert size={20} />}
+                  totalCount={DEMO_RISKS.length + DEMO_HIDDEN_CLAUSES.length + DEMO_COMPLIANCE.length}
+                >
+                  <Accordion
+                    title="Risks"
+                    icon={<AlertCircle size={18} className="text-red-600" />}
+                    count={DEMO_RISKS.length}
+                    variant="danger"
+                  >
+                    <AnalysisSection items={DEMO_RISKS} />
+                  </Accordion>
+                  <Accordion
+                    title="Hidden Clauses"
+                    icon={<EyeOff size={18} className="text-red-600" />}
+                    count={DEMO_HIDDEN_CLAUSES.length}
+                    variant="danger"
+                  >
+                    <AnalysisSection items={DEMO_HIDDEN_CLAUSES} />
+                  </Accordion>
+                  <Accordion
+                    title="Compliance Issues"
+                    icon={<ShieldCheck size={18} className="text-orange-600" />}
+                    count={DEMO_COMPLIANCE.length}
+                    variant="warning"
+                  >
+                    <AnalysisSection items={DEMO_COMPLIANCE} />
+                  </Accordion>
+                </SectionGroup>
+              )}
+
+              {demoTab === "perspectives" && (
+                <SectionGroup
+                  id="demo-perspectives"
+                  title="Analysis Perspectives"
+                  icon={<FileText size={20} />}
+                  totalCount={4}
+                >
+                  <Accordion
+                    title="Legal Perspective"
+                    icon={<Scale size={18} className="text-purple-600" />}
+                  >
+                    <AnalysisSection text={DEMO_LEGAL_PERSPECTIVE} />
+                  </Accordion>
+                  <Accordion
+                    title="Financial Perspective"
+                    icon={<DollarSign size={18} className="text-blue-600" />}
+                  >
+                    <AnalysisSection text={DEMO_FINANCIAL_PERSPECTIVE} />
+                  </Accordion>
+                  <Accordion
+                    title="Operational Perspective"
+                    icon={<Settings size={18} className="text-teal-600" />}
+                  >
+                    <AnalysisSection text={DEMO_OPERATIONAL_PERSPECTIVE} />
+                  </Accordion>
+                  <Accordion
+                    title="Strategic Perspective"
+                    icon={<Target size={18} className="text-indigo-600" />}
+                  >
+                    <AnalysisSection text={DEMO_STRATEGIC_PERSPECTIVE} />
+                  </Accordion>
+                </SectionGroup>
+              )}
+
+              {demoTab === "details" && (
+                <SectionGroup
+                  id="demo-details"
+                  title="Contract Details"
+                  icon={<FileCheck size={20} />}
+                  totalCount={
+                    DEMO_KEY_POINTS.length +
+                    DEMO_TERMINATION.length +
+                    DEMO_SUGGESTIONS.length +
+                    DEMO_NEGOTIATION.length
+                  }
+                >
+                  <Accordion
+                    title="Key Points"
+                    icon={<List size={18} className="text-[var(--foreground-muted)]" />}
+                    count={DEMO_KEY_POINTS.length}
+                  >
+                    <AnalysisSection items={DEMO_KEY_POINTS} />
+                  </Accordion>
+                  <Accordion
+                    title="Termination Conditions"
+                    icon={<X size={18} className="text-[var(--foreground-muted)]" />}
+                    count={DEMO_TERMINATION.length}
+                  >
+                    <AnalysisSection items={DEMO_TERMINATION} />
+                  </Accordion>
+                  <Accordion
+                    title="Suggestions"
+                    icon={<Lightbulb size={18} className="text-amber-600" />}
+                    count={DEMO_SUGGESTIONS.length}
+                  >
+                    <AnalysisSection items={DEMO_SUGGESTIONS} />
+                  </Accordion>
+                  <Accordion
+                    title="Negotiation Priorities"
+                    icon={<Handshake size={18} className="text-[var(--foreground-muted)]" />}
+                    count={DEMO_NEGOTIATION.length}
+                  >
+                    <AnalysisSection items={DEMO_NEGOTIATION} />
+                  </Accordion>
+                </SectionGroup>
+              )}
             </div>
-          </Card>
+          </div>
         </Section>
 
         <Section data-animate>
@@ -382,8 +543,8 @@ export default function Home() {
           <dl className="mt-10 space-y-4">
             {[
               {
-                q: "Is Contralytic a replacement for legal counsel?",
-                a: "No. Contralytic accelerates contract review and issue spotting, but final legal decisions remain your responsibility.",
+                q: "Is Clealex a replacement for legal counsel?",
+                a: "No. Clealex accelerates contract review and issue spotting, but final legal decisions remain your responsibility.",
               },
               {
                 q: "How is my contract data handled?",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { trackEventUserRegistered } from "@/lib/analytics";
 import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 import { TermsAcceptanceCheckbox } from "@/components/TermsAcceptanceCheckbox";
 
@@ -35,6 +36,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await api.post("/register", { name, email, password, terms_accepted: true });
+      trackEventUserRegistered();
       router.push("/login");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");

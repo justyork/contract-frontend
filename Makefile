@@ -2,7 +2,7 @@
 
 # * Default target
 help:
-	@echo "Contralytic / Contractor Frontend — Makefile"
+	@echo "Clealex Frontend — Makefile"
 	@echo ""
 	@echo "Available targets:"
 	@echo "  make install        - Install npm dependencies"

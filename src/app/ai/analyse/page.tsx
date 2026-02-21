@@ -8,6 +8,11 @@ import { buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
 import { api } from "@/lib/api";
+import {
+  trackEventAnalyzeCompleted,
+  trackEventAnalyzeFailed,
+  trackEventAnalyzeStarted,
+} from "@/lib/analytics";
 import type { AnalyseResponse } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -50,6 +55,7 @@ export default function AnalysePage() {
     if (!canSubmitText || !legalConfirmed) return;
     setError("");
     setLoading(true);
+    trackEventAnalyzeStarted();
     try {
       const body: { text: string; language?: string; legal_confirmed: boolean } = {
         text,
@@ -57,10 +63,13 @@ export default function AnalysePage() {
       };
       if (language) body.language = language;
       const res = await api.post<AnalyseResponse>("/documents/text", body);
+      trackEventAnalyzeCompleted(res.id, res.tokens);
       await refreshProfile();
       router.push(`/ai/contract/${res.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Analysis failed");
+      const msg = err instanceof Error ? err.message : "Analysis failed";
+      trackEventAnalyzeFailed(msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -71,16 +80,20 @@ export default function AnalysePage() {
     if (!file || (profile?.tokens ?? 0) < 1 || !legalConfirmed) return;
     setError("");
     setLoading(true);
+    trackEventAnalyzeStarted();
     try {
       const form = new FormData();
       form.append("file", file);
       form.append("legal_confirmed", legalConfirmed ? "true" : "false");
       if (language) form.append("language", language);
       const res = await api.postFormData<AnalyseResponse>("/documents/upload", form);
+      trackEventAnalyzeCompleted(res.id, res.tokens);
       await refreshProfile();
       router.push(`/ai/contract/${res.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Analysis failed");
+      const msg = err instanceof Error ? err.message : "Analysis failed";
+      trackEventAnalyzeFailed(msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -124,7 +137,7 @@ export default function AnalysePage() {
             Upload PDF
           </button>
         </div>
-
+{/* 
         <div className="mt-5">
           <label className="block text-sm font-medium text-[var(--foreground)]">
             Language
@@ -140,7 +153,7 @@ export default function AnalysePage() {
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         {error && (
           <p className="mt-4 rounded-[var(--radius-md)] bg-red-50 p-3 text-sm text-red-700">

@@ -1,16 +1,14 @@
-# Privacy Policy
 
-Last updated: [DATE]
+Last updated: 23.02.2026
 
 **Important Notice:** This Privacy Policy is an informational document that describes our data practices. It does not constitute legal advice. If you have questions about your privacy rights or our data practices, you may wish to consult with a qualified attorney or data protection professional.
 
-This Privacy Policy explains how [Company Name] ("Provider", "we", "us") collects, uses, and protects personal data when you use the Service. It applies to the same "Service" and "User" as defined in the [Terms of Use](/terms).
+This Privacy Policy explains how Clealex ("Provider", "we", "us") collects, uses, and protects personal data when you use the Service. It applies to the same "Service" and "User" as defined in the [Terms of Use](/terms).
 
 ## 1. Data Controller
-
-[Company Name]  
-[Address]  
-[Email]
+Clealex  
+Cyprus, Limassol 3031, Efkleidou 9 
+support@clealex.com
 
 ## 2. Types of Data Collected
 
@@ -122,9 +120,9 @@ We may update this Privacy Policy periodically. Material changes will be communi
 
 For privacy inquiries, data subject requests (access, deletion, portability, etc.), or complaints:
 
-**Email:** [Privacy Email]  
-**Company:** [Company Name]  
-**Address:** [Address]
+**Email:** privacy@clealex.com  
+**Company:** Clealex  
+**Address:** Cyprus, Limassol 3031, Efkleidou 9
 
 If you are in the EEA/UK and we have appointed an EU/UK representative or data protection officer, their contact details will be listed on our website or provided on request.
 

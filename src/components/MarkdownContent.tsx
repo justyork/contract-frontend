@@ -67,6 +67,30 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
               {...props}
             />
           ),
+          table: ({ ...props }) => (
+            <div className="my-6 overflow-x-auto">
+              <table
+                className="w-full border-collapse border border-[var(--border)] text-left text-sm"
+                {...props}
+              />
+            </div>
+          ),
+          thead: ({ ...props }) => (
+            <thead className="bg-[var(--surface-muted)]" {...props} />
+          ),
+          tbody: ({ ...props }) => <tbody {...props} />,
+          tr: ({ ...props }) => (
+            <tr className="border-b border-[var(--border)] last:border-b-0" {...props} />
+          ),
+          th: ({ ...props }) => (
+            <th
+              className="px-4 py-2 font-semibold text-[var(--foreground)]"
+              {...props}
+            />
+          ),
+          td: ({ ...props }) => (
+            <td className="px-4 py-2 text-[var(--foreground-muted)]" {...props} />
+          ),
           code: ({ className, ...props }) => {
             const isCodeBlock = className?.includes("language-");
 

@@ -88,4 +88,20 @@ NODE_ENV=production npm run start
 
 Запускает Next.js в продакшен-режиме на порту по умолчанию (3000); разместить за обратным прокси (напр. nginx) с HTTPS. Переменные окружения задавать в процессе или в `.env.production` (секреты не коммитить).
 
+## Пример: Hetzner + GitHub Actions (Ubuntu + aaPanel)
+
+Деплой по SSH при push в `develop` (staging) или `master` (production). Workflow: `.github/workflows/ci.yml`, `.github/workflows/deploy.yml`.
+
+**GitHub Secrets:**
+
+| Secret | Описание |
+|--------|----------|
+| `SSH_PRIVATE_KEY` | Приватный ключ для SSH (без пароля) |
+| `SSH_HOST` | Хост или IP сервера |
+| `SSH_USER` | Пользователь ОС |
+| `DEPLOY_PATH_STAGING` | Путь к коду staging, напр. `/var/www/clealex-frontend-staging` |
+| `DEPLOY_PATH_PRODUCTION` | Путь к коду production, напр. `/var/www/clealex-frontend` |
+
+**На сервере:** два каталога (staging и production), в каждом клон репо с соответствующей веткой и свой `.env`/`.env.production`. После `git pull` выполняется `npm ci`, `npm run build` и перезапуск приложения (PM2 или systemd; имена сервисов в `deploy.yml` при необходимости изменить: напр. `clealex-frontend-staging`, `clealex-frontend`).
+
 Этот документ — единственная ссылка по развёртыванию фронтенда; обновлять при изменении CI или хостинга.

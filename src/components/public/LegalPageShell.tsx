@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PublicFooter } from "@/components/public/PublicFooter";
 import { Container } from "@/components/ui/Container";
 
-type LegalPage = "terms" | "privacy" | "cookie-policy";
+type LegalPage = "terms" | "privacy" | "cookie-policy" | "contact";
 
 interface LegalPageShellProps {
   title: string;
@@ -11,12 +11,12 @@ interface LegalPageShellProps {
   children: ReactNode;
 }
 
-const legalLinks: Array<{ href: `/${LegalPage}`; label: string; key: LegalPage }> =
-  [
-    { href: "/terms", label: "Terms", key: "terms" },
-    { href: "/privacy", label: "Privacy", key: "privacy" },
-    { href: "/cookie-policy", label: "Cookies", key: "cookie-policy" },
-  ];
+const legalLinks: Array<{ href: string; label: string; key: LegalPage }> = [
+  { href: "/terms", label: "Terms", key: "terms" },
+  { href: "/privacy", label: "Privacy", key: "privacy" },
+  { href: "/cookie-policy", label: "Cookies", key: "cookie-policy" },
+  { href: "/contact", label: "Contact", key: "contact" },
+];
 
 export function LegalPageShell({
   title,
@@ -31,7 +31,7 @@ export function LegalPageShell({
           className="flex h-16 items-center justify-between gap-4"
         >
           <Link href="/" className="focus-ring rounded-sm font-medium text-[var(--foreground-muted)] hover:text-[var(--foreground)]">
-            ← Contralytic
+            ← Clealex
           </Link>
           <nav aria-label="Legal navigation" className="flex items-center gap-3 text-sm">
             {legalLinks.map((item) => {

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { trackEventPaymentReceived, trackEventTokensPurchased } from "@/lib/analytics";
 import type { PaymentConfirmResponse } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -27,7 +28,7 @@ function paymentErrorMessage(code: string | undefined): string {
   }
 }
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { refreshProfile } = useAuth();
@@ -47,6 +48,8 @@ export default function PaymentSuccessPage() {
         refreshProfile();
         setTokens(data.tokens);
         setStatus("ok");
+        trackEventPaymentReceived();
+        trackEventTokensPurchased(data.tokens);
       })
       .catch((err: unknown) => {
         const code =
@@ -92,5 +95,21 @@ export default function PaymentSuccessPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center">
+            <p className="text-slate-600">Confirming payment…</p>
+          </div>
+        </div>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
