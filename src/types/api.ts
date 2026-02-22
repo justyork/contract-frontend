@@ -4,6 +4,7 @@ export interface Profile {
   name: string;
   email: string;
   tokens: number;
+  preferred_currency: "eur" | "usd";
 }
 
 /** Token balance (GET /api/tokens/balance) */
@@ -23,6 +24,7 @@ export interface TokenPackage {
   description: string | null;
   tokens: number;
   price: string;
+  currency: "eur" | "usd";
   savings: string | null;
   stripe_price_id: string | null;
   stripe_product_id: string | null;

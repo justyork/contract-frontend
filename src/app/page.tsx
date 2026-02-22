@@ -39,6 +39,9 @@ import {
   ScoreCard,
   SectionGroup,
 } from "@/components/contract-analysis";
+import { usePreferredCurrency, currencySymbol } from "@/hooks/usePreferredCurrency";
+import { api } from "@/lib/api";
+import type { TokenPackage } from "@/types/api";
 
 const iconProps = { size: 24, strokeWidth: 1.5 };
 
@@ -117,6 +120,8 @@ const DEMO_TABS: Array<{ id: DemoReportTab; label: string }> = [
 
 export default function Home() {
   const [demoTab, setDemoTab] = useState<DemoReportTab>("risks");
+  const { currency, setCurrency } = usePreferredCurrency();
+  const [packages, setPackages] = useState<TokenPackage[]>([]);
 
   useEffect(() => {
     const els = document.querySelectorAll("[data-animate]");
@@ -136,6 +141,17 @@ export default function Home() {
     });
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    api
+      .get<TokenPackage[]>(`/tokens/packages?currency=${currency}`)
+      .then((data) => {
+        setPackages(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {
+        setPackages([]);
+      });
+  }, [currency]);
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -488,38 +504,40 @@ export default function Home() {
               1 token is about 1,000 characters. Average contract (~20K chars) is
               about 20 tokens.
             </p>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-1">
+              {(["eur", "usd"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setCurrency(option)}
+                  className={`focus-ring rounded-[var(--radius-sm)] px-3 py-1.5 text-xs font-medium uppercase ${
+                    option === currency
+                      ? "bg-[var(--primary)] text-white"
+                      : "text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {[
-              { name: "Starter", tokens: 20, price: "€2", note: "1 analysis" },
-              {
-                name: "Pro",
-                tokens: 50,
-                price: "€4.50",
-                note: "2-3 analyses",
-                popular: true,
-              },
-              { name: "Business", tokens: 100, price: "€8", note: "5 analyses" },
-              {
-                name: "Enterprise",
-                tokens: 200,
-                price: "€15",
-                note: "10 analyses",
-              },
-            ].map((plan) => (
+          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {packages.map((plan) => (
               <Card
                 key={plan.name}
-                className={plan.popular ? "border-[var(--primary)]/40 shadow-[var(--shadow-card)] ring-1 ring-[var(--primary)]/10" : ""}
+                className={plan.name === "Pro" ? "border-[var(--primary)]/40 shadow-[var(--shadow-card)] ring-1 ring-[var(--primary)]/10" : ""}
               >
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-base font-medium text-[var(--foreground)]">
                     {plan.name}
                   </h3>
-                  {plan.popular && <Badge variant="brand">Most popular</Badge>}
+                  {plan.name === "Pro" && <Badge variant="brand">Most popular</Badge>}
                 </div>
-                <p className="mt-2 text-sm text-[var(--foreground-muted)]">{plan.note}</p>
+                <p className="mt-2 text-sm text-[var(--foreground-muted)]">
+                  {Math.max(1, Math.floor(plan.tokens / 20))} analyses
+                </p>
                 <p className="mt-4 text-3xl font-bold text-[var(--foreground)]">
-                  {plan.price}
+                  {currencySymbol(plan.currency)}{plan.price}
                 </p>
                 <p className="mt-1 text-sm text-[var(--foreground-muted)]">
                   {plan.tokens} tokens

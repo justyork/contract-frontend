@@ -7,26 +7,34 @@ import { PageHeader } from "@/components/ai/PageHeader";
 import { buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Spinner } from "@/components/ui/Spinner";
+import { usePreferredCurrency, currencySymbol } from "@/hooks/usePreferredCurrency";
 import { api } from "@/lib/api";
 import type { TokenPackage } from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function TokensPage() {
   const { profile } = useAuth();
-  const [packages, setPackages] = useState<TokenPackage[]>([]);
-  const [packagesLoading, setPackagesLoading] = useState(true);
+  const { currency, setCurrency } = usePreferredCurrency(profile?.preferred_currency);
+  const [packages, setPackages] = useState<TokenPackage[] | null>(null);
   const [buyLoading, setBuyLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     api
-      .get<TokenPackage[]>("/tokens/packages")
+      .get<TokenPackage[]>(`/tokens/packages?currency=${currency}`)
       .then((data) => {
         setPackages(Array.isArray(data) ? data : []);
       })
-      .catch(() => setPackages([]))
-      .finally(() => setPackagesLoading(false));
-  }, []);
+      .catch(() => setPackages([]));
+  }, [currency]);
+
+  const packagesLoading = null === packages;
+
+  const handleCurrencyChange = (next: "eur" | "usd") => {
+    if (next === currency) return;
+    setPackages(null);
+    setCurrency(next);
+  };
 
   const handleBuy = async (priceId: string) => {
     if (!priceId) {
@@ -57,6 +65,22 @@ export default function TokensPage() {
       <p className="mb-4 text-sm text-[var(--foreground-muted)]">
         Current balance: {profile?.tokens ?? 0} tokens
       </p>
+      <div className="mb-6 inline-flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-1">
+        {(["eur", "usd"] as const).map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => handleCurrencyChange(option)}
+            className={`focus-ring rounded-[var(--radius-sm)] px-3 py-1.5 text-xs font-medium uppercase ${
+              option === currency
+                ? "bg-[var(--primary)] text-white"
+                : "text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
 
       {error && (
         <p className="mb-4 rounded-[var(--radius-md)] bg-red-50 p-3 text-sm text-red-700">
@@ -71,7 +95,7 @@ export default function TokensPage() {
         </div>
       )}
 
-      {!packagesLoading && packages.length === 0 && (
+      {!packagesLoading && packages?.length === 0 && (
         <EmptyState
           title="No token packages available right now"
           description="Packages may need to be configured in the backend. Try again later or contact support."
@@ -83,17 +107,21 @@ export default function TokensPage() {
         />
       )}
 
-      {!packagesLoading && packages.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {packages.map((pkg) => (
+      {!packagesLoading && (packages?.length ?? 0) > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {(packages ?? []).map((pkg) => (
             <Card key={pkg.id}>
               <h2 className="text-lg font-semibold text-[var(--foreground)]">{pkg.name}</h2>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">
                 {pkg.description ?? ""}
               </p>
-              <p className="mt-4 text-3xl font-bold text-[var(--foreground)]">${pkg.price}</p>
+              <p className="mt-4 text-3xl font-bold text-[var(--foreground)]">
+                {currencySymbol(pkg.currency)}{pkg.price}
+              </p>
               {pkg.savings && (
-                <p className="text-sm text-emerald-700">Save ${pkg.savings}</p>
+                <p className="text-sm text-emerald-700">
+                  Save {currencySymbol(pkg.currency)}{pkg.savings}
+                </p>
               )}
               <p className="text-sm text-[var(--foreground-muted)]">{pkg.tokens} tokens</p>
               <button
