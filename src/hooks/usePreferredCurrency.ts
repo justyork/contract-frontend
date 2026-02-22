@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type SupportedCurrency = "eur" | "usd";
 
@@ -15,21 +15,25 @@ export function currencySymbol(currency: SupportedCurrency): string {
   return currency === "usd" ? "$" : "€";
 }
 
+/** Default used for SSR and initial client render to avoid hydration mismatch. */
+function getDefaultCurrency(profileCurrency?: string | null): SupportedCurrency {
+  return normalizeCurrency(profileCurrency);
+}
+
 export function usePreferredCurrency(profileCurrency?: string | null) {
-  const [currency, setCurrencyState] = useState<SupportedCurrency>(() => {
-    if (typeof window === "undefined") {
-      return normalizeCurrency(profileCurrency);
-    }
+  const [currency, setCurrencyState] = useState<SupportedCurrency>(() =>
+    getDefaultCurrency(profileCurrency)
+  );
 
+  useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return normalizeCurrency(stored);
+    const next = stored ? normalizeCurrency(stored) : getDefaultCurrency(profileCurrency);
+    if (!stored) {
+      localStorage.setItem(STORAGE_KEY, next);
     }
-
-    const normalized = normalizeCurrency(profileCurrency);
-    localStorage.setItem(STORAGE_KEY, normalized);
-    return normalized;
-  });
+    const id = setTimeout(() => setCurrencyState(next), 0);
+    return () => clearTimeout(id);
+  }, [profileCurrency]);
 
   const setCurrency = useCallback((next: SupportedCurrency) => {
     const normalized = normalizeCurrency(next);

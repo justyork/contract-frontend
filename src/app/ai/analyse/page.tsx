@@ -244,11 +244,14 @@ export default function AnalysePage() {
           </form>
         )}
 
-        {(profile?.tokens ?? 0) < 1 && (
+        {((profile?.tokens ?? 0) < 1 ||
+          (tab === "text" && cost > 0 && (profile?.tokens ?? 0) < cost)) && (
           <p className="mt-6 text-sm text-amber-700">
-            You need tokens to analyse.{" "}
+            {tab === "text" && cost > 0
+              ? `You need ~${cost} tokens for this contract. `
+              : "You need tokens to analyse. "}
             <Link href="/ai/tokens" className="font-medium underline">
-              Buy tokens
+              Get a starter package on the tokens page
             </Link>
             .
           </p>

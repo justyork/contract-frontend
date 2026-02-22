@@ -59,7 +59,7 @@ export default function TokensPage() {
     <>
       <PageHeader
         title="Buy tokens"
-        description="One token is about 1,000 characters. Average contract (~20K chars) is about 20 tokens."
+        description="One token is about 1,000 characters. Average contract (~10K chars) is about 10 tokens. New accounts get 10 free tokens."
       />
 
       <p className="mb-4 text-sm text-[var(--foreground-muted)]">

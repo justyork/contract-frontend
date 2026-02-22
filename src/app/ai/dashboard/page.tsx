@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ContractSummaryCard } from "@/components/ai/ContractSummaryCard";
 import { EmptyState } from "@/components/ai/EmptyState";
@@ -11,8 +12,11 @@ import { api } from "@/lib/api";
 import type { Contract } from "@/types/api";
 
 export default function DashboardPage() {
+  const searchParams = useSearchParams();
+  const showWelcome = searchParams.get("welcome") === "1";
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dismissedWelcome, setDismissedWelcome] = useState(false);
 
   useEffect(() => {
     api
@@ -22,8 +26,38 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const showWelcomeBanner = showWelcome && !dismissedWelcome;
+
   return (
     <>
+      {showWelcomeBanner && (
+        <div
+          className="mb-6 flex items-center justify-between gap-4 rounded-[var(--radius-lg)] border border-[var(--primary)]/20 bg-[var(--primary)]/5 px-4 py-3 text-sm text-[var(--foreground)]"
+          role="status"
+          aria-live="polite"
+        >
+          <span>
+            Welcome! You have 10 free tokens to get started (about one contract).
+            Run your first analysis or buy more tokens when you need them.
+          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href="/ai/analyse"
+              className={buttonClassName("primary", "sm")}
+            >
+              Analyse contract
+            </Link>
+            <button
+              type="button"
+              onClick={() => setDismissedWelcome(true)}
+              className="text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
+              aria-label="Dismiss welcome message"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       <PageHeader
         title="My contracts"
         description="Review previous analyses and open any contract report in one click."

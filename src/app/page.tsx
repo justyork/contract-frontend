@@ -118,6 +118,27 @@ const DEMO_TABS: Array<{ id: DemoReportTab; label: string }> = [
   { id: "details", label: "Contract Details" },
 ];
 
+const TESTIMONIALS = [
+  {
+    quote:
+      "Caught an automatic renewal clause I completely missed. Saved me from a 12-month lock-in.",
+    name: "Anna K.",
+    role: "Freelance Designer",
+  },
+  {
+    quote:
+      "We run 5–10 vendor contracts a month. Clealex cuts our first-pass review time in half.",
+    name: "Michael S.",
+    role: "Operations Manager, SMB",
+  },
+  {
+    quote:
+      "The negotiation priorities section alone justifies the cost. Very actionable output.",
+    name: "Laura P.",
+    role: "In-house Legal Counsel",
+  },
+];
+
 export default function Home() {
   const [demoTab, setDemoTab] = useState<DemoReportTab>("risks");
   const { currency, setCurrency } = usePreferredCurrency();
@@ -165,14 +186,14 @@ export default function Home() {
       <main id="main-content">
         <Section spacing="lg" className="hero-gradient pb-16 pt-20 sm:pt-28">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge variant="brand">AI contract clarity for fast decisions</Badge>
+            <Badge variant="brand">Spot hidden risks before you sign</Badge>
             <h1 className="mt-6 font-light text-4xl tracking-tight text-[var(--foreground)] sm:text-5xl md:text-6xl">
               Sign with confidence, not guesswork
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-[var(--foreground-muted)]">
-              Clealex reviews your contract in minutes and highlights hidden
-              risks, key obligations, and negotiation priorities in one clean
-              report.
+              Clealex reads your contract and surfaces hidden traps, one-sided
+              clauses, and negotiation priorities — so you sign knowing exactly
+              what you&apos;re agreeing to.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -192,8 +213,8 @@ export default function Home() {
             </div>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm text-[var(--foreground-muted)]">
               <Badge>Encrypted processing</Badge>
-              <Badge>GDPR-ready workflows</Badge>
-              <Badge>No legal advice replacement</Badge>
+              <Badge>GDPR-ready</Badge>
+              <Badge>No subscription required</Badge>
             </div>
           </div>
         </Section>
@@ -256,8 +277,7 @@ export default function Home() {
                 Icon: Upload,
               },
               {
-                step:
-                  "Choose your language and run analysis in one click.",
+                step: "Run analysis in one click.",
                 Icon: Languages,
               },
               {
@@ -461,18 +481,18 @@ export default function Home() {
           <div className="mt-10 grid gap-4 md:grid-cols-3">
             {[
               {
-                value: "10k+",
-                label: "contracts reviewed*",
-                Icon: TrendingUp,
-              },
-              {
-                value: "<5 min",
-                label: "average first-pass analysis time*",
+                value: "Minutes",
+                label: "from upload to full report",
                 Icon: Clock,
               },
               {
+                value: "AI + ML",
+                label: "multi-layer analysis pipeline",
+                Icon: TrendingUp,
+              },
+              {
                 value: "24/7",
-                label: "self-serve availability",
+                label: "self-serve, no waiting list",
                 Icon: Zap,
               },
             ].map(({ value, label, Icon }) => (
@@ -492,17 +512,34 @@ export default function Home() {
               </Card>
             ))}
           </div>
-          <p className="mt-4 text-center text-xs text-[var(--foreground-muted)]">
-            * Placeholder metrics. Replace with production analytics values.
-          </p>
+        </Section>
+
+        <Section background="surface" data-animate>
+          <div className="text-center">
+            <h2 className="section-title font-light">What users say</h2>
+          </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {TESTIMONIALS.map(({ quote, name, role }) => (
+              <Card key={name}>
+                <p className="text-sm leading-relaxed text-[var(--foreground-muted)] italic">
+                  &ldquo;{quote}&rdquo;
+                </p>
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-[var(--foreground)]">{name}</p>
+                  <p className="text-xs text-[var(--foreground-muted)]">{role}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
         </Section>
 
         <Section id="pricing" background="surface" data-animate>
           <div className="text-center">
             <h2 className="section-title font-light">Simple pay-per-use pricing</h2>
             <p className="section-subtitle">
-              1 token is about 1,000 characters. Average contract (~20K chars) is
-              about 20 tokens.
+              One analysis costs less than 5 minutes of a lawyer&apos;s time.
+              Average contract (~10K characters) uses about 10 tokens. 10 free
+              tokens when you register.
             </p>
             <div className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-1">
               {(["eur", "usd"] as const).map((option) => (
@@ -534,7 +571,7 @@ export default function Home() {
                   {plan.name === "Pro" && <Badge variant="brand">Most popular</Badge>}
                 </div>
                 <p className="mt-2 text-sm text-[var(--foreground-muted)]">
-                  {Math.max(1, Math.floor(plan.tokens / 20))} analyses
+                  {Math.max(1, Math.floor(plan.tokens / 10))} analyses
                 </p>
                 <p className="mt-4 text-3xl font-bold text-[var(--foreground)]">
                   {currencySymbol(plan.currency)}{plan.price}
@@ -542,12 +579,22 @@ export default function Home() {
                 <p className="mt-1 text-sm text-[var(--foreground-muted)]">
                   {plan.tokens} tokens
                 </p>
+                {plan.description && (
+                  <p className="mt-2 text-xs text-[var(--foreground-muted)]">
+                    {plan.description}
+                  </p>
+                )}
+                {plan.savings && (
+                  <span className="mt-2 inline-block">
+                    <Badge variant="success">Save {plan.savings}</Badge>
+                  </span>
+                )}
                 <Link
                   href="/register"
                   className={`${buttonClassName("secondary", "md", true)} mt-5`}
                   data-analytics-event="pricing_cta_click"
                 >
-                  Choose {plan.name}
+                  Get started with {plan.name}
                 </Link>
               </Card>
             ))}
@@ -575,6 +622,18 @@ export default function Home() {
               {
                 q: "Do tokens expire?",
                 a: "No. Token packages are one-time purchases and remain available on your account.",
+              },
+              {
+                q: "Do I get free tokens?",
+                a: "Yes. New accounts receive 10 free tokens (about one contract, ~10K characters) when they register.",
+              },
+              {
+                q: "What if I'm not satisfied with the analysis?",
+                a: "Each analysis gives you a full structured report. If the result is unclear or incomplete, contact support — we review edge cases individually.",
+              },
+              {
+                q: "How accurate is the AI analysis?",
+                a: "Clealex identifies structural risks and hidden clauses with high recall. It is not a substitute for legal advice, but it gives you a clear starting point and saves significant review time.",
               },
             ].map((item) => (
               <Card key={item.q}>

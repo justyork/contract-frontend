@@ -37,7 +37,7 @@ export default function RegisterPage() {
     try {
       await api.post("/register", { name, email, password, terms_accepted: true });
       trackEventUserRegistered();
-      router.push("/login");
+      router.push("/login?welcome=1");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -50,6 +50,9 @@ export default function RegisterPage() {
       <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-900">Create account</h1>
         <p className="mt-2 text-sm text-slate-600">
+          Get 10 free tokens (about one contract) when you sign up.
+        </p>
+        <p className="mt-1 text-sm text-slate-600">
           Already have an account?{" "}
           <Link href="/login" className="font-medium text-slate-800 hover:underline">
             Log in

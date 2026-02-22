@@ -12,7 +12,12 @@ import { GoogleAuthButton } from "@/components/GoogleAuthButton";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/ai/dashboard";
+  const baseRedirect = searchParams.get("redirect") ?? "/ai/dashboard";
+  const welcome = searchParams.get("welcome");
+  const redirect =
+    welcome === "1"
+      ? `${baseRedirect.replace(/\?.*$/, "")}?welcome=1`
+      : baseRedirect;
   const { setToken } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

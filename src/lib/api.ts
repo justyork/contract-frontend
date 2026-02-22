@@ -6,7 +6,7 @@
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
 
-const getToken = (): string | null => {
+export const getToken = (): string | null => {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("token");
 };
