@@ -31,6 +31,22 @@ export interface TokenPackage {
   active: boolean;
 }
 
+/** Supported contract families for analysis request (frontend selector). NOT_LEGAL omitted — not offered as a choice. */
+export const CONTRACT_FAMILY_OPTIONS = [
+  { value: "auto", label: "Detect document type automatically" },
+  { value: "GENERIC_LEGAL", label: "General legal contract (other agreements)" },
+  { value: "EMPLOYMENT_RELEASE", label: "Employment, termination or release / waiver" },
+  { value: "SAAS_DPA", label: "SaaS agreement or data processing (DPA / GDPR)" },
+  { value: "SERVICES_SOW", label: "Services agreement or statement of work (SOW)" },
+  { value: "NDA", label: "Non-disclosure agreement (NDA)" },
+  { value: "VENDOR_PROCUREMENT", label: "Vendor or procurement / supply agreement" },
+  { value: "PURCHASE_SALE", label: "Purchase or sale agreement" },
+  { value: "PARTNERSHIP_JV", label: "Partnership or joint venture agreement" },
+  { value: "REAL_ESTATE_LEASE", label: "Real estate lease" },
+] as const;
+
+export type ContractFamilyValue = (typeof CONTRACT_FAMILY_OPTIONS)[number]["value"];
+
 /** Contract analysis result (from AI) */
 export interface ContractAnalysisResult {
   contract_type: string;
@@ -52,6 +68,10 @@ export interface ContractAnalysisResult {
   hidden_financial_obligations: string[];
   one_sided_clauses: string[];
   risk_severity: 'low' | 'medium' | 'high' | 'critical';
+  /** Contract family from classifier (e.g. NOT_LEGAL, SAAS_DPA). Present in API response. */
+  contract_family?: string;
+  /** Secondary family for hybrid documents. Present in API response. */
+  secondary_family?: string | null;
 }
 
 /** Contract (GET /api/contracts or /api/contracts/:id) */

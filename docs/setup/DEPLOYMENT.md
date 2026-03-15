@@ -104,4 +104,116 @@ NODE_ENV=production npm run start
 
 **На сервере:** два каталога (staging и production), в каждом клон репо с соответствующей веткой и свой `.env`/`.env.production`. После `git pull` выполняется `npm ci`, `npm run build` и перезапуск приложения (PM2 или systemd; имена сервисов в `deploy.yml` при необходимости изменить: напр. `clealex-frontend-staging`, `clealex-frontend`).
 
+## Устранение неполадок: старый контент после деплоя
+
+**PM2 не кеширует ответы** — это только менеджер процессов. Кеш даёт либо браузер, либо прокси перед приложением (чаще всего nginx или CDN).
+
+### Если перезагрузка в терминале (pm2 restart / node) не помогает
+
+Значит кеш **не в приложении**, а **перед ним** (nginx или CDN). Next.js уже отдаёт новое, но ответ кешируется прокси.
+
+**Быстрая проверка на сервере** — сравнить ответ с localhost и по публичному домену:
+
+```bash
+# Порт приложения (если не 3000 — подставить свой)
+PORT=3000
+
+# Ответ напрямую от приложения (должен быть новый контент и Cache-Control: s-maxage=0)
+echo "=== Ответ от приложения (127.0.0.1:$PORT) ==="
+curl -sI "http://127.0.0.1:$PORT/"
+
+# Ответ через nginx/внешний адрес (если здесь старый контент или старые заголовки — кеш в nginx/CDN)
+echo "=== Ответ по домену (через nginx) ==="
+curl -sI "https://ВАШ_ДОМЕН/"
+```
+
+Если по `127.0.0.1` всё новое, а по домену — старое, **нужно править nginx (или очистить кеш CDN)**. См. шаги 3 и 4 ниже.
+
+### 1. Убедиться, что крутится новый процесс
+
+На сервере:
+
+```bash
+pm2 list
+pm2 show clealex-frontend   # смотреть "uptime" — после рестарта должно обнулиться
+```
+
+Если в деплое указано неверное имя (не то, под которым зарегистрирован процесс), `pm2 restart clealex-frontend` ничего не перезапустит и будет работать старый процесс. Имена в `deploy.yml` должны совпадать с `pm2 list`.
+
+### 2. Проверить ответ напрямую от Node (минуя nginx)
+
+На сервере:
+
+```bash
+curl -sI http://127.0.0.1:3000/
+```
+
+Посмотреть заголовок **Cache-Control**: должно быть `s-maxage=0` (как в `next.config.ts`). Если контент/заголовки правильные по `curl` на localhost, но в браузере по домену — старый, кеш не в PM2 и не в Next.js.
+
+### 3. Кеш nginx (Hetzner + aaPanel)
+
+Если перед приложением стоит nginx, он может кешировать ответы. Нужно отключить кеш прокси для этого сайта.
+
+**Где править (aaPanel):** Website → нужный сайт → Settings → Configuration File (или конфиг вручную в `/www/server/panel/vhost/nginx/ИМЯ_САЙТА.conf`).
+
+**Что искать и убрать/заменить:**
+- Строки с `proxy_cache`, `proxy_cache_path`, `proxy_cache_valid` — удалить или закомментировать для location, который проксирует на Next.js.
+- В блок `location /` (или тот, что проксирует на порт приложения) добавить или оставить:
+
+```nginx
+proxy_cache off;
+proxy_no_cache 1;
+proxy_cache_bypass 1;
+```
+
+**Полный пример location для Next.js (без кеша):** см. ниже пример для aaPanel.
+
+**Пример: конфиг aaPanel для Next.js (clealex.com)**
+
+Почему старый контент не уходит:
+
+1. **`proxy_ignore_headers Set-Cookie Cache-Control expires`** — nginx не учитывает заголовок Cache-Control от Next.js, поэтому настройки из `next.config.ts` не действуют на уровне прокси.
+2. **`proxy_cache cache_one`** и **`proxy_cache_valid 200 304 301 302 1m`** — nginx кеширует все ответы на 1 минуту; после деплоя пользователи до минуты видят старую версию.
+
+Нужно убрать кеш прокси для этого location и не игнорировать Cache-Control. Вариант конфига (заменить блок `#PROXY-START` … `#PROXY-END` на такой):
+
+```nginx
+#PROXY-START/www/wwwroot/clealex.com
+location ^~ /
+{
+    proxy_pass http://localhost:3000;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header REMOTE-HOST $remote_addr;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+    proxy_http_version 1.1;
+
+    # Отключаем кеш nginx — иначе после деплоя до 1m отдаётся старый контент
+    proxy_cache off;
+    proxy_no_cache 1;
+    proxy_cache_bypass 1;
+    # Не игнорировать Cache-Control от Next.js (убрать proxy_ignore_headers для Cache-Control)
+    proxy_ignore_headers Set-Cookie;
+
+    add_header X-Cache-Status $upstream_cache_status;
+
+    # Кеш только для статики по расширению (опционально; для Next.js статика уже с хешем в имени)
+    if ( $uri ~* "\.(gif|png|jpg|css|js|woff|woff2)$" )
+    {
+        expires 1m;
+    }
+}
+#PROXY-END/
+```
+
+Удалено: `proxy_cache cache_one`, `proxy_cache_key`, `proxy_cache_valid`, из `proxy_ignore_headers` убраны `Cache-Control` и `expires`. Добавлено: `proxy_cache off`, `proxy_no_cache 1`, `proxy_cache_bypass 1`.
+
+После правок: Save в aaPanel → Nginx → Reload (или `sudo nginx -t && sudo systemctl reload nginx`).
+
+### 4. CDN (Cloudflare и т.п.)
+
+Если перед сервером стоит CDN, после деплоя сделать **Purge Cache** в панели CDN. Дальше настроить кеш так, чтобы HTML не кешировался долго или учитывался Cache-Control от апстрима.
+
 Этот документ — единственная ссылка по развёртыванию фронтенда; обновлять при изменении CI или хостинга.

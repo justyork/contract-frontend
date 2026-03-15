@@ -11,6 +11,8 @@ interface QuickSummaryProps {
   contractTypeTooltip?: string;
   /** Optional tooltip for Parties. */
   partiesTooltip?: string;
+  /** When true, contract type is shown with neutral styling and a short notice (e.g. NOT_LEGAL result). */
+  isNotLegal?: boolean;
 }
 
 export function QuickSummary({
@@ -18,6 +20,7 @@ export function QuickSummary({
   parties,
   contractTypeTooltip,
   partiesTooltip,
+  isNotLegal = false,
 }: QuickSummaryProps) {
   if (!contractType && !parties?.length) {
     return null;
@@ -40,8 +43,13 @@ export function QuickSummary({
                 )}
               </div>
               <div className="mt-1">
-                <Badge variant="brand">{contractType}</Badge>
+                <Badge variant={isNotLegal ? "neutral" : "brand"}>{contractType}</Badge>
               </div>
+              {isNotLegal && (
+                <p className="mt-2 text-xs text-[var(--foreground-muted)]">
+                  Limited analysis — document was not classified as a legal contract.
+                </p>
+              )}
             </div>
           </div>
         )}

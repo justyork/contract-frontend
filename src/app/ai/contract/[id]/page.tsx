@@ -290,7 +290,7 @@ export default function ContractPage() {
       const elapsed = Date.now() - startTimeRef.current;
       const elapsedSeconds = elapsed / 1000;
       // * Estimate: 0-30s = 0-30%, 30-60s = 30-60%, 60-90s = 60-85%, 90+ = 85-95% (never 100% until completed)
-      let estimatedPercent = 0;
+      let estimatedPercent;
       let stageLabel = "Starting...";
       if (elapsedSeconds < 5) {
         estimatedPercent = Math.min(14, (elapsedSeconds / 5) * 14);
@@ -467,6 +467,10 @@ export default function ContractPage() {
 
   const score = r.signing_recommendation ?? 0;
 
+  const isNotLegal =
+    r.contract_family === "NOT_LEGAL" ||
+    r.contract_type === "Not a legal contract";
+
   // Calculate total counts for section groups
   const risksCount =
     (r.risks?.length ?? 0) +
@@ -494,9 +498,30 @@ export default function ContractPage() {
         }
       />
 
+      {isNotLegal && (
+        <Card className="mb-6 border-amber-200 bg-amber-50/80 dark:border-amber-800 dark:bg-amber-950/30">
+          <div className="flex items-start gap-3">
+            <AlertCircle
+              size={20}
+              className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-500"
+              aria-hidden
+            />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                Document was not recognised as a legal contract
+              </p>
+              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                Analysis is limited. Key points and suggestions explain why. Submit a full contract or legal document for full risk analysis.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <ScoreCard
         score={score}
         tooltip={FIELD_TOOLTIPS.signingRecommendation}
+        riskSeverity={r.risk_severity}
       />
 
       <QuickSummary
@@ -504,6 +529,7 @@ export default function ContractPage() {
         parties={r.parties}
         contractTypeTooltip={FIELD_TOOLTIPS.contractType}
         partiesTooltip={FIELD_TOOLTIPS.parties}
+        isNotLegal={isNotLegal}
       />
 
       {/* Risks & Issues Section */}

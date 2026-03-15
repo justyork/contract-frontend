@@ -30,7 +30,7 @@ jobs:
             git pull origin "$BRANCH"
             yarn install
             yarn build
-            pm2 restart clealex-frontend-staging 2>/dev/null || true
+            pm2 restart clealex-frontend-staging
 
   deploy-production:
     name: Deploy to Production
@@ -54,4 +54,4 @@ jobs:
             git pull origin "$BRANCH"
             yarn install
             yarn build
-            pm2 restart clealex-frontend 2>/dev/null || true
+            pm2 restart clealex-frontend

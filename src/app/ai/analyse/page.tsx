@@ -13,7 +13,11 @@ import {
   trackEventAnalyzeFailed,
   trackEventAnalyzeStarted,
 } from "@/lib/analytics";
-import type { AnalyseResponse } from "@/types/api";
+import {
+  CONTRACT_FAMILY_OPTIONS,
+  type AnalyseResponse,
+  type ContractFamilyValue,
+} from "@/types/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const MIN_LEN = 1000;
@@ -30,6 +34,7 @@ export default function AnalysePage() {
   const [tab, setTab] = useState<"text" | "file">("text");
   const [text, setText] = useState("");
   const [language] = useState("");
+  const [contractFamily, setContractFamily] = useState<ContractFamilyValue>("auto");
   const [file, setFile] = useState<File | null>(null);
   const [legalConfirmed, setLegalConfirmed] = useState(false);
   const [error, setError] = useState("");
@@ -50,11 +55,17 @@ export default function AnalysePage() {
     setLoading(true);
     trackEventAnalyzeStarted();
     try {
-      const body: { text: string; language?: string; legal_confirmed: boolean } = {
+      const body: {
+        text: string;
+        language?: string;
+        legal_confirmed: boolean;
+        contract_family?: ContractFamilyValue;
+      } = {
         text,
         legal_confirmed: legalConfirmed,
       };
       if (language) body.language = language;
+      if (contractFamily !== "auto") body.contract_family = contractFamily;
       const res = await api.post<AnalyseResponse>("/documents/text", body);
       trackEventAnalyzeCompleted(res.id, res.tokens);
       await refreshProfile();
@@ -79,6 +90,7 @@ export default function AnalysePage() {
       form.append("file", file);
       form.append("legal_confirmed", legalConfirmed ? "true" : "false");
       if (language) form.append("language", language);
+      if (contractFamily !== "auto") form.append("contract_family", contractFamily);
       const res = await api.postFormData<AnalyseResponse>("/documents/upload", form);
       trackEventAnalyzeCompleted(res.id, res.tokens);
       await refreshProfile();
@@ -147,6 +159,23 @@ export default function AnalysePage() {
             ))}
           </select>
         </div> */}
+
+        <div className="mt-5">
+          <label className="block text-sm font-medium text-[var(--foreground)]">
+            Contract type
+          </label>
+          <select
+            value={contractFamily}
+            onChange={(e) => setContractFamily(e.target.value as ContractFamilyValue)}
+            className="focus-ring mt-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)]"
+          >
+            {CONTRACT_FAMILY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {error && (
           <p className="mt-4 rounded-[var(--radius-md)] bg-red-50 p-3 text-sm text-red-700">

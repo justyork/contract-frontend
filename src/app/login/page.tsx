@@ -44,6 +44,14 @@ function LoginContent() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-900">Log in</h1>
+        {welcome === "1" && (
+          <div
+            className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800"
+            role="status"
+          >
+            Check your email to verify your account. Click the link we sent you, then log in here.
+          </div>
+        )}
         <p className="mt-2 text-sm text-slate-600">
           New?{" "}
           <Link href="/register" className="font-medium text-slate-800 hover:underline">
