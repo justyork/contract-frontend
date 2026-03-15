@@ -61,7 +61,9 @@ export function useLandingVariant(): UseLandingVariantResult {
       return;
     }
     if (PERSIST_VARIANT_IN_SESSION) {
-      setStoredVariantState(getStoredVariant());
+      // Defer setState to avoid synchronous setState in effect (cascading renders).
+      const value = getStoredVariant();
+      queueMicrotask(() => setStoredVariantState(value));
     }
   }, [fromParams, fromQuery]);
 
