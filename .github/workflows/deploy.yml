@@ -26,7 +26,6 @@ jobs:
             BRANCH="develop"
             cd "$DEPLOY_PATH" || { echo "Invalid DEPLOY_PATH"; exit 1; }
             git reset --hard HEAD
-            git clean -fd
             git fetch origin
             git checkout "$BRANCH"
             git pull origin "$BRANCH"
@@ -52,7 +51,6 @@ jobs:
             BRANCH="master"
             cd "$DEPLOY_PATH" || { echo "Invalid DEPLOY_PATH"; exit 1; }
             git reset --hard HEAD
-            git clean -fd
             git fetch origin
             git checkout "$BRANCH"
             git pull origin "$BRANCH"
