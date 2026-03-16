@@ -25,6 +25,8 @@ jobs:
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH_STAGING }}"
             BRANCH="develop"
             cd "$DEPLOY_PATH" || { echo "Invalid DEPLOY_PATH"; exit 1; }
+            git reset --hard HEAD
+            git clean -fd
             git fetch origin
             git checkout "$BRANCH"
             git pull origin "$BRANCH"
@@ -49,6 +51,8 @@ jobs:
             DEPLOY_PATH="${{ secrets.DEPLOY_PATH_PRODUCTION }}"
             BRANCH="master"
             cd "$DEPLOY_PATH" || { echo "Invalid DEPLOY_PATH"; exit 1; }
+            git reset --hard HEAD
+            git clean -fd
             git fetch origin
             git checkout "$BRANCH"
             git pull origin "$BRANCH"
